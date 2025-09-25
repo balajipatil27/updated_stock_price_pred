@@ -358,6 +358,38 @@
             }
         }
 
+        .data-table {
+            background: rgba(26, 32, 44, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3),
+                0 0 0 1px rgba(16, 185, 129, 0.2);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            max-width: 1400px;
+            width: 100%;
+            margin-bottom: 30px;
+            display: none;
+        }
+
+        .data-table table {
+            width: 100%;
+            border-collapse: collapse;
+            color: #e2e8f0;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.1);
+        }
+
+        .data-table th {
+            background: rgba(102, 126, 234, 0.1);
+            font-weight: 600;
+        }
+
         @media (max-width: 768px) {
             .header h1 {
                 font-size: 2.2rem;
@@ -408,7 +440,7 @@
 
         <!-- Stock Analysis Form -->
         <div class="form-card fade-in">
-            <form method="POST" id="stockForm">
+            <form id="stockForm">
                 <div class="input-group">
                     <label for="stock">Stock Ticker Symbol</label>
                     <div class="input-wrapper">
@@ -425,8 +457,7 @@
         </div>
 
         <!-- Price Prediction Form -->
-        {% if model_trained %}
-        <div class="prediction-card fade-in" id="predictionCard" style="display: block;">
+        <div class="prediction-card fade-in" id="predictionCard">
             <h3 style="color: #e2e8f0; margin-bottom: 25px; text-align: center;">
                 <i class="fas fa-crystal-ball"></i> Predict Closing Price
             </h3>
@@ -436,20 +467,14 @@
                         <label for="open">Opening Price ($)</label>
                         <div class="input-wrapper">
                             <i class="fas fa-chart-line"></i>
-                            <input type="number" class="form-input" id="open" name="open" step="0.01" {% if price_ranges
-                                %} min="{{ price_ranges.open_min }}" max="{{ price_ranges.open_max }}"
-                                placeholder="Range: ${{ '%.2f'|format(price_ranges.open_min) }} - ${{ '%.2f'|format(price_ranges.open_max) }}"
-                                {% endif %} required>
+                            <input type="number" class="form-input" id="open" name="open" step="0.01" required>
                         </div>
                     </div>
                     <div class="input-group">
                         <label for="high">High Price ($)</label>
                         <div class="input-wrapper">
                             <i class="fas fa-arrow-up"></i>
-                            <input type="number" class="form-input" id="high" name="high" step="0.01" {% if price_ranges
-                                %} min="{{ price_ranges.high_min }}" max="{{ price_ranges.high_max }}"
-                                placeholder="Range: ${{ '%.2f'|format(price_ranges.high_min) }} - ${{ '%.2f'|format(price_ranges.high_max) }}"
-                                {% endif %} required>
+                            <input type="number" class="form-input" id="high" name="high" step="0.01" required>
                         </div>
                     </div>
                 </div>
@@ -458,20 +483,14 @@
                         <label for="low">Low Price ($)</label>
                         <div class="input-wrapper">
                             <i class="fas fa-arrow-down"></i>
-                            <input type="number" class="form-input" id="low" name="low" step="0.01" {% if price_ranges
-                                %} min="{{ price_ranges.low_min }}" max="{{ price_ranges.low_max }}"
-                                placeholder="Range: ${{ '%.2f'|format(price_ranges.low_min) }} - ${{ '%.2f'|format(price_ranges.low_max) }}"
-                                {% endif %} required>
+                            <input type="number" class="form-input" id="low" name="low" step="0.01" required>
                         </div>
                     </div>
                     <div class="input-group">
                         <label for="volume">Volume</label>
                         <div class="input-wrapper">
                             <i class="fas fa-chart-bar"></i>
-                            <input type="number" class="form-input" id="volume" name="volume" step="1" {% if
-                                price_ranges %} min="{{ price_ranges.volume_min }}" max="{{ price_ranges.volume_max }}"
-                                placeholder="Range: {{ '{:,}'.format(price_ranges.volume_min) }} - {{ '{:,}'.format(price_ranges.volume_max) }}"
-                                {% endif %} required>
+                            <input type="number" class="form-input" id="volume" name="volume" step="1" required>
                         </div>
                     </div>
                 </div>
@@ -483,117 +502,90 @@
 
             <!-- Prediction Result Area -->
             <div id="predictionResult"></div>
-
-            {% if price_ranges %}
-            <div class="prediction-details" style="margin-top: 20px; text-align: center;">
-                <strong>Latest Closing Price:</strong> ${{ '%.2f'|format(price_ranges.latest_close) }}
-            </div>
-            {% endif %}
         </div>
-        {% endif %}
 
         <!-- Charts Section -->
-        {% if plot_path_ema_20_50 or plot_path_ema_100_200 or plot_path_ohlc %}
-        <div class="content-grid fade-in">
-            {% if plot_path_ema_20_50 %}
-            <div class="chart-card">
-                <div class="chart-header">
-                    <div class="chart-icon">
-                        <i class="fas fa-chart-area"></i>
-                    </div>
-                    <h3 class="chart-title">20 & 50 Day EMA Analysis</h3>
-                </div>
-                <img src="{{ url_for('static', filename='ema_20_50.png') }}" class="chart-image"
-                    alt="EMA 20 & 50 Analysis">
-            </div>
-            {% endif %}
-
-            {% if plot_path_ema_100_200 %}
-            <div class="chart-card">
-                <div class="chart-header">
-                    <div class="chart-icon">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
-                    <h3 class="chart-title">100 & 200 Day EMA Analysis</h3>
-                </div>
-                <img src="{{ url_for('static', filename='ema_100_200.png') }}" class="chart-image"
-                    alt="EMA 100 & 200 Analysis">
-            </div>
-            {% endif %}
-
-            {% if plot_path_ohlc %}
-            <div class="chart-card">
-                <div class="chart-header">
-                    <div class="chart-icon">
-                        <i class="fas fa-candlestick-chart"></i>
-                    </div>
-                    <h3 class="chart-title">OHLC Price Analysis</h3>
-                </div>
-                <img src="{{ url_for('static', filename='ohlc_chart.png') }}" class="chart-image" alt="OHLC Analysis">
-            </div>
-            {% endif %}
+        <div class="content-grid fade-in" id="chartsSection" style="display: none;">
+            <!-- Charts will be dynamically added here -->
         </div>
-        {% endif %}
 
         <!-- Data Table Section -->
-        {% if data_desc %}
-        <div class="chart-card fade-in" style="max-width: 1400px; width: 100%; margin-bottom: 30px;">
+        <div class="data-table fade-in" id="dataTableSection">
             <div class="chart-header">
                 <div class="chart-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
                     <i class="fas fa-table"></i>
                 </div>
                 <h3 class="chart-title">Historical Data Analysis</h3>
             </div>
-            <div class="table-responsive">
-                {{ data_desc | safe }}
+            <div id="dataTableContent">
+                <!-- Table will be populated here -->
             </div>
         </div>
-        {% endif %}
-
-        <!-- Download Section -->
-        {% if dataset_link %}
-        <div class="download-section fade-in" style="text-align: center; margin-bottom: 40px;">
-            <a href="{{ url_for('download_file', filename=dataset_link.split('/')[-1]) }}" class="download-btn" download
-                style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-                      color: white;
-                      border: none;
-                      padding: 15px 30px;
-                      border-radius: 12px;
-                      font-size: 1.1rem;
-                      font-weight: 600;
-                      cursor: pointer;
-                      transition: all 0.3s ease;
-                      text-decoration: none;
-                      display: inline-flex;
-                      align-items: center;
-                      gap: 10px;">
-                <i class="fas fa-download"></i>
-                Download Complete Dataset (CSV)
-            </a>
-        </div>
-        {% endif %}
-
-        <!-- Error Display -->
-        {% if error %}
-        <div class="error-message fade-in">
-            <i class="fas fa-exclamation-triangle"></i>
-            {{ error }}
-        </div>
-        {% endif %}
     </div>
 
     <script>
-        // Form submission with loading animation for stock analysis
-        document.getElementById('stockForm').addEventListener('submit', function (e) {
+        const BACKEND_URL = 'https://updated-stock-price-pred-1.onrender.com';
+        let currentStock = '';
+        let priceRanges = null;
+
+        // Stock Analysis Form submission
+        document.getElementById('stockForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            
+            const stockTicker = document.getElementById('stock').value.trim().toUpperCase();
+            if (!stockTicker) return;
+
+            currentStock = stockTicker;
+            
+            // Show loading
             document.getElementById('loadingOverlay').style.display = 'flex';
 
-            setTimeout(() => {
-                // Form will submit normally after this
-            }, 100);
+            try {
+                // Call backend to analyze stock
+                const response = await fetch(`${BACKEND_URL}/analyze`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ stock: stockTicker })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    // Show prediction form
+                    document.getElementById('predictionCard').style.display = 'block';
+                    
+                    // Store price ranges for validation
+                    priceRanges = result.price_ranges;
+                    
+                    // Update input placeholders with ranges if available
+                    if (priceRanges) {
+                        updateInputPlaceholders();
+                    }
+                    
+                    // Display charts if available
+                    displayCharts(result);
+                    
+                    // Display data table if available
+                    displayDataTable(result.data_desc);
+                    
+                    // Scroll to prediction form
+                    document.getElementById('predictionCard').scrollIntoView({ behavior: 'smooth' });
+                    
+                    showSuccessMessage(`Successfully analyzed ${stockTicker}! Model trained and ready for predictions.`);
+                    
+                } else {
+                    showError(result.error || 'Failed to analyze stock');
+                }
+                
+            } catch (error) {
+                showError('Network error: ' + error.message);
+            }
+            
+            document.getElementById('loadingOverlay').style.display = 'none';
         });
 
         // Prediction form submission
-        document.getElementById('predictionForm')?.addEventListener('submit', async function (e) {
+        document.getElementById('predictionForm').addEventListener('submit', async function (e) {
             e.preventDefault();
 
             const formData = new FormData(this);
@@ -625,9 +617,7 @@
             `;
 
             try {
-                const backendBaseURL = 'https://updated-stock-price-pred-1.onrender.com';  // Put your Render backend URL here
-
-                const response = await fetch(`${backendBaseURL}/predict`, {
+                const response = await fetch(`${BACKEND_URL}/predict`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
@@ -645,11 +635,79 @@
             }
         });
 
+        function updateInputPlaceholders() {
+            if (!priceRanges) return;
+            
+            const inputs = {
+                'open': `Range: $${priceRanges.open_min.toFixed(2)} - $${priceRanges.open_max.toFixed(2)}`,
+                'high': `Range: $${priceRanges.high_min.toFixed(2)} - $${priceRanges.high_max.toFixed(2)}`,
+                'low': `Range: $${priceRanges.low_min.toFixed(2)} - $${priceRanges.low_max.toFixed(2)}`,
+                'volume': `Range: ${priceRanges.volume_min.toLocaleString()} - ${priceRanges.volume_max.toLocaleString()}`
+            };
+            
+            Object.entries(inputs).forEach(([id, placeholder]) => {
+                const input = document.getElementById(id);
+                if (input) {
+                    input.placeholder = placeholder;
+                    input.min = id === 'volume' ? priceRanges[id + '_min'] : priceRanges[id + '_min'].toFixed(2);
+                    input.max = id === 'volume' ? priceRanges[id + '_max'] : priceRanges[id + '_max'].toFixed(2);
+                }
+            });
+        }
+
+        function displayCharts(result) {
+            const chartsSection = document.getElementById('chartsSection');
+            chartsSection.innerHTML = '';
+            
+            const charts = [
+                { key: 'plot_path_ema_20_50', filename: 'ema_20_50.png', title: '20 & 50 Day EMA Analysis', icon: 'fa-chart-area' },
+                { key: 'plot_path_ema_100_200', filename: 'ema_100_200.png', title: '100 & 200 Day EMA Analysis', icon: 'fa-chart-line' },
+                { key: 'plot_path_ohlc', filename: 'ohlc_chart.png', title: 'OHLC Price Analysis', icon: 'fa-candlestick-chart' }
+            ];
+            
+            let hasCharts = false;
+            charts.forEach(chart => {
+                if (result[chart.key]) {
+                    hasCharts = true;
+                    const chartDiv = document.createElement('div');
+                    chartDiv.className = 'chart-card';
+                    chartDiv.innerHTML = `
+                        <div class="chart-header">
+                            <div class="chart-icon">
+                                <i class="fas ${chart.icon}"></i>
+                            </div>
+                            <h3 class="chart-title">${chart.title}</h3>
+                        </div>
+                        <img src="${BACKEND_URL}/static/${chart.filename}" class="chart-image" alt="${chart.title}">
+                    `;
+                    chartsSection.appendChild(chartDiv);
+                }
+            });
+            
+            if (hasCharts) {
+                chartsSection.style.display = 'grid';
+            }
+        }
+
+        function displayDataTable(dataDesc) {
+            if (dataDesc) {
+                document.getElementById('dataTableContent').innerHTML = dataDesc;
+                document.getElementById('dataTableSection').style.display = 'block';
+            }
+        }
+
         function showPrediction(predictedClose, inputData) {
             const resultDiv = document.getElementById('predictionResult');
             const changeFromOpen = ((predictedClose - inputData.open) / inputData.open * 100).toFixed(2);
             const changeColor = changeFromOpen >= 0 ? '#10b981' : '#ef4444';
             const changeIcon = changeFromOpen >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
+
+            let latestCloseInfo = '';
+            if (priceRanges && priceRanges.latest_close) {
+                latestCloseInfo = `<div class="prediction-details" style="margin-top: 15px;">
+                    <strong>Latest Closing Price:</strong> $${priceRanges.latest_close.toFixed(2)}
+                </div>`;
+            }
 
             resultDiv.innerHTML = `
                 <div class="prediction-result">
@@ -664,6 +722,7 @@
                         <strong>Input Values:</strong><br>
                         Open: $${inputData.open} | High: $${inputData.high} | Low: $${inputData.low} | Volume: ${inputData.volume.toLocaleString()}
                     </div>
+                    ${latestCloseInfo}
                 </div>
             `;
         }
@@ -677,6 +736,57 @@
                 </div>
             `;
         }
+
+        function showSuccessMessage(message) {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'prediction-result';
+            successDiv.style.background = 'rgba(16, 185, 129, 0.1)';
+            successDiv.style.border = '2px solid rgba(16, 185, 129, 0.3)';
+            successDiv.style.margin = '20px 0';
+            successDiv.innerHTML = `
+                <div style="color: #10b981; font-size: 1.1rem; font-weight: 600;">
+                    <i class="fas fa-check-circle"></i> ${message}
+                </div>
+            `;
+            
+            document.querySelector('.form-card').appendChild(successDiv);
+            
+            // Remove success message after 5 seconds
+            setTimeout(() => {
+                successDiv.remove();
+            }, 5000);
+        }
+
+        // Input validation helpers
+        document.getElementById('high').addEventListener('input', function () {
+            const open = parseFloat(document.getElementById('open').value) || 0;
+            const low = parseFloat(document.getElementById('low').value) || 0;
+            const high = parseFloat(this.value) || 0;
+
+            if (high > 0 && (open > 0 || low > 0)) {
+                const minHigh = Math.max(open, low);
+                if (high < minHigh) {
+                    this.setCustomValidity(`High must be at least $${minHigh.toFixed(2)}`);
+                } else {
+                    this.setCustomValidity('');
+                }
+            }
+        });
+
+        document.getElementById('low').addEventListener('input', function () {
+            const open = parseFloat(document.getElementById('open').value) || Infinity;
+            const high = parseFloat(document.getElementById('high').value) || Infinity;
+            const low = parseFloat(this.value) || 0;
+
+            if (low > 0 && (open < Infinity || high < Infinity)) {
+                const maxLow = Math.min(open, high);
+                if (maxLow < Infinity && low > maxLow) {
+                    this.setCustomValidity(`Low must be at most $${maxLow.toFixed(2)}`);
+                } else {
+                    this.setCustomValidity('');
+                }
+            }
+        });
 
         // Add animation on page load
         window.addEventListener('load', function () {
@@ -701,41 +811,4 @@
             });
         });
 
-        // Input validation helpers
-        document.getElementById('high')?.addEventListener('input', function () {
-            const open = parseFloat(document.getElementById('open').value) || 0;
-            const low = parseFloat(document.getElementById('low').value) || 0;
-            const high = parseFloat(this.value) || 0;
-
-            if (high > 0 && (open > 0 || low > 0)) {
-                const minHigh = Math.max(open, low);
-                if (high < minHigh) {
-                    this.setCustomValidity(`High must be at least $${minHigh.toFixed(2)}`);
-                } else {
-                    this.setCustomValidity('');
-                }
-            }
-        });
-
-        document.getElementById('low')?.addEventListener('input', function () {
-            const open = parseFloat(document.getElementById('open').value) || Infinity;
-            const high = parseFloat(document.getElementById('high').value) || Infinity;
-            const low = parseFloat(this.value) || 0;
-
-            if (low > 0 && (open < Infinity || high < Infinity)) {
-                const maxLow = Math.min(open, high);
-                if (maxLow < Infinity && low > maxLow) {
-                    this.setCustomValidity(`Low must be at most $${maxLow.toFixed(2)}`);
-                } else {
-                    this.setCustomValidity('');
-                }
-            }
-        });
-
         // Smooth scrolling for better UX
-        document.documentElement.style.scrollBehavior = 'smooth';
-    </script>
-</body>
-
-
-</html>
