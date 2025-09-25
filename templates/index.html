@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Trend Prediction</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            color: #e2e8f0;
+        }
+
+        .main-container {
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #ffffff;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(102, 126, 234, 0.5), 0 0 40px rgba(102, 126, 234, 0.3);
+            color: #ffffff;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            color: #cbd5e0;
+        }
+
+        .form-card {
+            background: rgba(26, 32, 44, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4),
+                0 0 0 1px rgba(102, 126, 234, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            max-width: 600px;
+            width: 100%;
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .prediction-card {
+            background: rgba(16, 185, 129, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4),
+                0 0 0 1px rgba(16, 185, 129, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            max-width: 600px;
+            width: 100%;
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+            display: none;
+        }
+
+        .form-card::before,
+        .prediction-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 20px;
+            padding: 2px;
+            background: linear-gradient(45deg,
+                    rgba(102, 126, 234, 0.5) 0%,
+                    rgba(118, 75, 162, 0.5) 25%,
+                    rgba(16, 185, 129, 0.5) 50%,
+                    rgba(102, 126, 234, 0.5) 75%,
+                    rgba(118, 75, 162, 0.5) 100%);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: exclude;
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            animation: borderGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes borderGlow {
+            0% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #e2e8f0;
+            font-size: 1.1rem;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #667eea;
+            font-size: 1.2rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 15px 15px 15px 50px;
+            border: 2px solid rgba(226, 232, 240, 0.2);
+            border-radius: 12px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            background: rgba(248, 250, 252, 0.1);
+            color: #e2e8f0;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .input-grid .input-group {
+            margin-bottom: 0;
+        }
+
+        .submit-btn,
+        .predict-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .predict-btn {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .submit-btn:hover,
+        .predict-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4),
+                0 0 30px rgba(102, 126, 234, 0.6);
+        }
+
+        .predict-btn:hover {
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4),
+                0 0 30px rgba(16, 185, 129, 0.6);
+        }
+
+        .submit-btn:active,
+        .predict-btn:active {
+            transform: translateY(0);
+        }
+
+        .content-grid {
+            width: 100%;
+            max-width: 1400px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .chart-card {
+            background: rgba(26, 32, 44, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3),
+                0 0 0 1px rgba(102, 126, 234, 0.2);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chart-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4),
+                0 0 40px rgba(102, 126, 234, 0.3);
+        }
+
+        .chart-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(241, 245, 249, 0.1);
+        }
+
+        .chart-icon {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 1.2rem;
+        }
+
+        .chart-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #e2e8f0;
+            margin: 0;
+        }
+
+        .chart-image {
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .prediction-result {
+            background: rgba(16, 185, 129, 0.1);
+            border: 2px solid rgba(16, 185, 129, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .prediction-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #10b981;
+            margin: 10px 0;
+        }
+
+        .prediction-label {
+            font-size: 1.2rem;
+            color: #e2e8f0;
+            margin-bottom: 15px;
+        }
+
+        .prediction-details {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            margin-top: 15px;
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 2px solid rgba(239, 68, 68, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            color: #ef4444;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.2rem;
+            }
+
+            .form-card,
+            .prediction-card {
+                padding: 25px;
+                margin: 0 15px 30px;
+            }
+
+            .content-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 0 15px;
+            }
+
+            .input-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .chart-card {
+                padding: 20px;
+            }
+
+            .chart-title {
+                font-size: 1.1rem;
+            }
+
+            .prediction-value {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <div class="main-container">
+        <div class="header">
+            <h1><i class="fas fa-chart-line"></i> Stock Trend Prediction</h1>
+            <p>Advanced AI-powered stock analysis and forecasting</p>
+        </div>
+
+        <!-- Stock Analysis Form -->
+        <div class="form-card fade-in">
+            <form method="POST" id="stockForm">
+                <div class="input-group">
+                    <label for="stock">Stock Ticker Symbol</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-search"></i>
+                        <input type="text" class="form-input" id="stock" name="stock"
+                            placeholder="e.g., AAPL, GOOGL, POWERGRID.NS" required>
+                    </div>
+                </div>
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-rocket"></i>
+                    Analyze Stock & Train Model
+                </button>
+            </form>
+        </div>
+
+        <!-- Price Prediction Form -->
+        {% if model_trained %}
+        <div class="prediction-card fade-in" id="predictionCard" style="display: block;">
+            <h3 style="color: #e2e8f0; margin-bottom: 25px; text-align: center;">
+                <i class="fas fa-crystal-ball"></i> Predict Closing Price
+            </h3>
+            <form id="predictionForm">
+                <div class="input-grid">
+                    <div class="input-group">
+                        <label for="open">Opening Price ($)</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-chart-line"></i>
+                            <input type="number" class="form-input" id="open" name="open" step="0.01" {% if price_ranges
+                                %} min="{{ price_ranges.open_min }}" max="{{ price_ranges.open_max }}"
+                                placeholder="Range: ${{ '%.2f'|format(price_ranges.open_min) }} - ${{ '%.2f'|format(price_ranges.open_max) }}"
+                                {% endif %} required>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label for="high">High Price ($)</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-arrow-up"></i>
+                            <input type="number" class="form-input" id="high" name="high" step="0.01" {% if price_ranges
+                                %} min="{{ price_ranges.high_min }}" max="{{ price_ranges.high_max }}"
+                                placeholder="Range: ${{ '%.2f'|format(price_ranges.high_min) }} - ${{ '%.2f'|format(price_ranges.high_max) }}"
+                                {% endif %} required>
+                        </div>
+                    </div>
+                </div>
+                <div class="input-grid">
+                    <div class="input-group">
+                        <label for="low">Low Price ($)</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-arrow-down"></i>
+                            <input type="number" class="form-input" id="low" name="low" step="0.01" {% if price_ranges
+                                %} min="{{ price_ranges.low_min }}" max="{{ price_ranges.low_max }}"
+                                placeholder="Range: ${{ '%.2f'|format(price_ranges.low_min) }} - ${{ '%.2f'|format(price_ranges.low_max) }}"
+                                {% endif %} required>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label for="volume">Volume</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-chart-bar"></i>
+                            <input type="number" class="form-input" id="volume" name="volume" step="1" {% if
+                                price_ranges %} min="{{ price_ranges.volume_min }}" max="{{ price_ranges.volume_max }}"
+                                placeholder="Range: {{ '{:,}'.format(price_ranges.volume_min) }} - {{ '{:,}'.format(price_ranges.volume_max) }}"
+                                {% endif %} required>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="predict-btn">
+                    <i class="fas fa-magic"></i>
+                    Predict Closing Price
+                </button>
+            </form>
+
+            <!-- Prediction Result Area -->
+            <div id="predictionResult"></div>
+
+            {% if price_ranges %}
+            <div class="prediction-details" style="margin-top: 20px; text-align: center;">
+                <strong>Latest Closing Price:</strong> ${{ '%.2f'|format(price_ranges.latest_close) }}
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Charts Section -->
+        {% if plot_path_ema_20_50 or plot_path_ema_100_200 or plot_path_ohlc %}
+        <div class="content-grid fade-in">
+            {% if plot_path_ema_20_50 %}
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-icon">
+                        <i class="fas fa-chart-area"></i>
+                    </div>
+                    <h3 class="chart-title">20 & 50 Day EMA Analysis</h3>
+                </div>
+                <img src="{{ url_for('static', filename='ema_20_50.png') }}" class="chart-image"
+                    alt="EMA 20 & 50 Analysis">
+            </div>
+            {% endif %}
+
+            {% if plot_path_ema_100_200 %}
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3 class="chart-title">100 & 200 Day EMA Analysis</h3>
+                </div>
+                <img src="{{ url_for('static', filename='ema_100_200.png') }}" class="chart-image"
+                    alt="EMA 100 & 200 Analysis">
+            </div>
+            {% endif %}
+
+            {% if plot_path_ohlc %}
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-icon">
+                        <i class="fas fa-candlestick-chart"></i>
+                    </div>
+                    <h3 class="chart-title">OHLC Price Analysis</h3>
+                </div>
+                <img src="{{ url_for('static', filename='ohlc_chart.png') }}" class="chart-image" alt="OHLC Analysis">
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Data Table Section -->
+        {% if data_desc %}
+        <div class="chart-card fade-in" style="max-width: 1400px; width: 100%; margin-bottom: 30px;">
+            <div class="chart-header">
+                <div class="chart-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                    <i class="fas fa-table"></i>
+                </div>
+                <h3 class="chart-title">Historical Data Analysis</h3>
+            </div>
+            <div class="table-responsive">
+                {{ data_desc | safe }}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Download Section -->
+        {% if dataset_link %}
+        <div class="download-section fade-in" style="text-align: center; margin-bottom: 40px;">
+            <a href="{{ url_for('download_file', filename=dataset_link.split('/')[-1]) }}" class="download-btn" download
+                style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                      color: white;
+                      border: none;
+                      padding: 15px 30px;
+                      border-radius: 12px;
+                      font-size: 1.1rem;
+                      font-weight: 600;
+                      cursor: pointer;
+                      transition: all 0.3s ease;
+                      text-decoration: none;
+                      display: inline-flex;
+                      align-items: center;
+                      gap: 10px;">
+                <i class="fas fa-download"></i>
+                Download Complete Dataset (CSV)
+            </a>
+        </div>
+        {% endif %}
+
+        <!-- Error Display -->
+        {% if error %}
+        <div class="error-message fade-in">
+            <i class="fas fa-exclamation-triangle"></i>
+            {{ error }}
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // Form submission with loading animation for stock analysis
+        document.getElementById('stockForm').addEventListener('submit', function (e) {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+
+            setTimeout(() => {
+                // Form will submit normally after this
+            }, 100);
+        });
+
+        // Prediction form submission
+        document.getElementById('predictionForm')?.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const data = {
+                open: parseFloat(formData.get('open')),
+                high: parseFloat(formData.get('high')),
+                low: parseFloat(formData.get('low')),
+                volume: parseFloat(formData.get('volume'))
+            };
+
+            // Basic validation
+            if (data.high < Math.max(data.open, data.low)) {
+                showError('High price must be greater than or equal to both Open and Low prices');
+                return;
+            }
+
+            if (data.low > Math.min(data.open, data.high)) {
+                showError('Low price must be less than or equal to both Open and High prices');
+                return;
+            }
+
+            // Show loading
+            const resultDiv = document.getElementById('predictionResult');
+            resultDiv.innerHTML = `
+                <div style="text-align: center; padding: 20px;">
+                    <div class="loading-spinner" style="margin: 0 auto 15px; width: 40px; height: 40px;"></div>
+                    <p style="color: #e2e8f0;">Calculating prediction...</p>
+                </div>
+            `;
+
+            try {
+                const backendBaseURL = 'https://your-backend-render-url.onrender.com';  // Put your Render backend URL here
+
+                const response = await fetch(`${backendBaseURL}/predict`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showPrediction(result.predicted_close, data);
+                } else {
+                    showError(result.error || 'Failed to get prediction');
+                }
+            } catch (error) {
+                showError('Network error: ' + error.message);
+            }
+        });
+
+        function showPrediction(predictedClose, inputData) {
+            const resultDiv = document.getElementById('predictionResult');
+            const changeFromOpen = ((predictedClose - inputData.open) / inputData.open * 100).toFixed(2);
+            const changeColor = changeFromOpen >= 0 ? '#10b981' : '#ef4444';
+            const changeIcon = changeFromOpen >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
+
+            resultDiv.innerHTML = `
+                <div class="prediction-result">
+                    <div class="prediction-label">
+                        <i class="fas fa-crystal-ball"></i> Predicted Closing Price
+                    </div>
+                    <div class="prediction-value">$${predictedClose}</div>
+                    <div style="color: ${changeColor}; font-size: 1.1rem; font-weight: 600; margin: 10px 0;">
+                        <i class="fas ${changeIcon}"></i> ${Math.abs(changeFromOpen)}% ${changeFromOpen >= 0 ? 'gain' : 'loss'} from open
+                    </div>
+                    <div class="prediction-details">
+                        <strong>Input Values:</strong><br>
+                        Open: $${inputData.open} | High: $${inputData.high} | Low: $${inputData.low} | Volume: ${inputData.volume.toLocaleString()}
+                    </div>
+                </div>
+            `;
+        }
+
+        function showError(message) {
+            const resultDiv = document.getElementById('predictionResult');
+            resultDiv.innerHTML = `
+                <div class="error-message">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    ${message}
+                </div>
+            `;
+        }
+
+        // Add animation on page load
+        window.addEventListener('load', function () {
+            const elements = document.querySelectorAll('.fade-in');
+            elements.forEach((el, index) => {
+                setTimeout(() => {
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                }, index * 200);
+            });
+        });
+
+        // Input focus effects
+        const inputs = document.querySelectorAll('.form-input');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function () {
+                this.parentNode.parentNode.style.transform = 'scale(1.02)';
+            });
+
+            input.addEventListener('blur', function () {
+                this.parentNode.parentNode.style.transform = 'scale(1)';
+            });
+        });
+
+        // Input validation helpers
+        document.getElementById('high')?.addEventListener('input', function () {
+            const open = parseFloat(document.getElementById('open').value) || 0;
+            const low = parseFloat(document.getElementById('low').value) || 0;
+            const high = parseFloat(this.value) || 0;
+
+            if (high > 0 && (open > 0 || low > 0)) {
+                const minHigh = Math.max(open, low);
+                if (high < minHigh) {
+                    this.setCustomValidity(`High must be at least $${minHigh.toFixed(2)}`);
+                } else {
+                    this.setCustomValidity('');
+                }
+            }
+        });
+
+        document.getElementById('low')?.addEventListener('input', function () {
+            const open = parseFloat(document.getElementById('open').value) || Infinity;
+            const high = parseFloat(document.getElementById('high').value) || Infinity;
+            const low = parseFloat(this.value) || 0;
+
+            if (low > 0 && (open < Infinity || high < Infinity)) {
+                const maxLow = Math.min(open, high);
+                if (maxLow < Infinity && low > maxLow) {
+                    this.setCustomValidity(`Low must be at most $${maxLow.toFixed(2)}`);
+                } else {
+                    this.setCustomValidity('');
+                }
+            }
+        });
+
+        // Smooth scrolling for better UX
+        document.documentElement.style.scrollBehavior = 'smooth';
+    </script>
+</body>
+
+</html>
